@@ -1,10 +1,29 @@
 import axios from 'axios';
 
-interface Swap {
-    id: string;
+export interface Swap {
+    origin: string;
     amount0: string;
     amount1: string;
-    timestamp: string;
+    amountUSD: string;
+    recipient: string;
+    transaction: {
+        id: string;
+        blockNumber: string;
+        timestamp: string;
+        gasUsed: string;
+        gasPrice: string;
+    };
+    pool: {
+        id: string;
+        token0: {
+            symbol: string;
+        }
+        token1: {
+            symbol: string;
+        }
+        volumeToken0: string;
+        volumeToken1: string;
+    };
 }
 
 interface SwapResponse {
@@ -13,7 +32,7 @@ interface SwapResponse {
     };
 }
 
-async function getSwapsForAccount(accountAddress: string): Promise<Swap[]> {
+export async function getSwapsForAccount(accountAddress: string): Promise<Swap[]> {
     // GraphQL query to retrieve swaps for an account
     const query = `
     {
@@ -69,11 +88,11 @@ async function getSwapsForAccount(accountAddress: string): Promise<Swap[]> {
 const accountAddress = '0x7c87243a79059BC592e5EcfF5B4776A179eBEc22';
 
 // Call the function to get swaps for the account
-getSwapsForAccount(accountAddress)
+/*getSwapsForAccount(accountAddress)
     .then((swaps) => {
         console.log('Swaps:', JSON.stringify(swaps, null, 2));
         // Process the swaps as needed
     })
     .catch((error) => {
         console.error('Error:', error);
-    });
+    });*/
