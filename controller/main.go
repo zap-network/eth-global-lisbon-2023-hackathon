@@ -13,6 +13,7 @@ type config struct {
 }
 
 var ControllerPort = ":8082"
+var ConfigGlobal = config{}
 
 func main() {
 	initConfig()

@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/labstack/echo"
 	"gopkg.in/yaml.v3"
@@ -13,6 +14,8 @@ import (
 var ControllerPort = ":8082"
 var CurrentConsumption = 0
 var CurrentProduction = 0
+
+var ConfigGlobal = config{}
 
 type config struct {
 	ProdutionRateHour   int `yaml:"currentProductionRateHour"`
@@ -35,7 +38,6 @@ func main() {
 
 func initConfig() (config, error) {
 
-	var cfg config
 	f, err := os.Open("config.yml")
 	if err != nil {
 		return config{}, err
@@ -44,12 +46,12 @@ func initConfig() (config, error) {
 	defer f.Close()
 
 	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(&cfg)
+	err = decoder.Decode(&ConfigGlobal)
 	if err != nil {
 		return config{}, nil
 	}
 
-	return cfg, nil
+	return ConfigGlobal, nil
 }
 
 func startEcho() {
@@ -81,13 +83,23 @@ func consumptionCounter() {
 
 func readContract() {
 
-	client, err := ethclient.Dial("https://api-testnet.polygonscan.com/")
+	client, err := ethclient.Dial("https://polygon-testnet-rpc.allthatnode.com:8545")
 	if err != nil {
 		// handle error
 
 	}
 
-	contractAddress := common.HexToAddress("0x4648a43B2C14Da09FdF82B161150d3F634f40491")
-	contract, err := NewMyContract(contractAddress, client)
+	address := common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
+	instance, err := NewZap(address, client)
+	if err != nil {
+		panic(err)
+	}
+
+	bal, err := instance.BalanceOf(nil, common.HexToAddress("0x18e2CeE48035F4558Eb75a629C37d713EFC005c2"))
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("\n\n balanceOf %+v \n\n", bal)
 
 }
