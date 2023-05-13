@@ -7,7 +7,33 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 import axios from 'axios';
-import { Card, Table } from "@nextui-org/react";
+import { Card, Table, Text, Row, Button } from "@nextui-org/react";
+import styled from 'styled-components';
+import { GiLightningHelix } from "react-icons/gi";
+
+const IndexPage = styled.div`
+    table{
+        background-color: white !important;
+    }
+`
+
+const Title = styled.h1`
+    font-weight: 1000;
+    font-style: oblique;
+    font-size: 2rem;
+    display: flex;
+    svg {
+        margin-right: 20px;
+    }
+`
+
+const CardLine = styled.div`
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 30px;
+    margin-bottom: 30px;
+`
 
 const columns = [
     {
@@ -131,11 +157,44 @@ export default function Home() {
     // }
 
     return (
-        <div>
+        <IndexPage>
+            <Title><GiLightningHelix size={48} color="yellow" />Zap Token </Title>
+            <CardLine>
             <Card>
-                {balances[accounts.toString()]}
+                <Card.Header>
+                    <Text b>Balance</Text>
+                </Card.Header>
+                <Card.Divider />
+                <Card.Body css={{ py: "$10" }}>
+                    <Text b>
+                        {balances.toString()} MATIC
+                    </Text>
+                </Card.Body>
             </Card>
-            <Table striped >
+            <Card>
+                <Card.Header>
+                    <Text b>Current Production Rate Hour</Text>
+                </Card.Header>
+                <Card.Divider />
+                <Card.Body css={{ py: "$10" }}>
+                    <Text b>
+                        {balances.toString()} Watt/hour
+                    </Text>
+                </Card.Body>
+            </Card>
+            <Card>
+                <Card.Header>
+                    <Text b>Current Consumption Rate Hour</Text>
+                </Card.Header>
+                <Card.Divider />
+                <Card.Body css={{ py: "$10" }}>
+                    <Text b>
+                        {balances.toString()} Watt/hour
+                    </Text>
+                </Card.Body>
+            </Card>
+            </CardLine>
+            <Table striped>
                 <Table.Header>
                     <Table.Column>From</Table.Column>
                     <Table.Column>To</Table.Column>
@@ -145,21 +204,19 @@ export default function Home() {
                 </Table.Header>
                 <Table.Body>
                     {txs.map((item, index) => (
-                            <Table.Row key={index} >
-                                <Table.Cell>
-                                    <a href={`${POLYGON_MUMBAI_URL}${item['hash']}`}>
+                        <Table.Row key={index} >
+                            <Table.Cell>
+                                <a href={`${POLYGON_MUMBAI_URL}${item['hash']}`}>
                                     {item["from"]}</a>
-                                    </Table.Cell>
-                                <Table.Cell>{item["to"]}</Table.Cell>
-                                <Table.Cell>{item["value"]}</Table.Cell>
-                                <Table.Cell>{item["gas"]}</Table.Cell>
-                                <Table.Cell>{item["state"]}</Table.Cell>
-                            </Table.Row>
+                            </Table.Cell>
+                            <Table.Cell>{item["to"]}</Table.Cell>
+                            <Table.Cell>{item["value"]}</Table.Cell>
+                            <Table.Cell>{item["gas"]}</Table.Cell>
+                            <Table.Cell>{item["state"]}</Table.Cell>
+                        </Table.Row>
                     ))}
                 </Table.Body>
             </Table>
-            <h1>About us</h1>
-            <p>Click <Link href="/">here</Link> to go back to the home page.</p>
-        </div>
+        </IndexPage>
     )
 }
