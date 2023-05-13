@@ -35,7 +35,7 @@ func EditConfig(c echo.Context) error {
 		ConfigGlobal.IntervalToCheck = newTime
 	}
 
-	newCurrentConsumptionRateHourVal, ok := json["timeToCheck"].(string)
+	newCurrentConsumptionRateHourVal, ok := json["currentConsumptionRateHour"].(string)
 	if ok {
 		newCurrentConsumptionRateHour, err := strconv.Atoi(newCurrentConsumptionRateHourVal)
 		if err != nil {
@@ -44,7 +44,7 @@ func EditConfig(c echo.Context) error {
 		ConfigGlobal.ConsumptionRateHour = newCurrentConsumptionRateHour
 	}
 
-	newCurrentProductionRateHourVal, ok := json["timeToCheck"].(string)
+	newCurrentProductionRateHourVal, ok := json["currentProductionRateHour"].(string)
 	if ok {
 		newCurrentProductionRateHour, err := strconv.Atoi(newCurrentProductionRateHourVal)
 		if err != nil {
