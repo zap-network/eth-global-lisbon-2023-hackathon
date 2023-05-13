@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSwapsForAccount = void 0;
 var axios_1 = require("axios");
 function getSwapsForAccount(accountAddress) {
     return __awaiter(this, void 0, void 0, function () {
@@ -61,6 +62,7 @@ function getSwapsForAccount(accountAddress) {
         });
     });
 }
+exports.getSwapsForAccount = getSwapsForAccount;
 //Uniswap Polygon Mumbai Contract address
 //0x4648a43B2C14Da09FdF82B161150d3F634f40491
 // Replace with your account address

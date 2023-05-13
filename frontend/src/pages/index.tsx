@@ -2,6 +2,7 @@
 import React from "react";
 import Web3 from "web3";
 import "../app/globals.css";
+import {Swap, getSwapsForAccount} from "../../client/src/contracts/SwapSubgraph"
 import "dotenv/config";
 import { Web3ModalButton } from "../components/Web3ModalButton.tsx";
 import { useState, useEffect } from 'react';
@@ -78,36 +79,10 @@ export default function Home() {
     const [web3, setWeb3] = useState<Web3>(new Web3('https://api-testnet.polygonscan.com/'));
     const [account, setAccount] = useState<string>("0x3a22c8bc68e98b0faf40f349dd2b2890fae01484");
     const [balances, setBalances] = useState<{ [account: string]: string }>({});
-    const [txs, setTxs] = useState<[]>([]);
+    const [txs, setTxs] = useState<Swap[]>([]);
     // const { active, error, activate } = useWeb3React<Web3Provider>();
 
     const API_ENDPOINT = 'https://api.polygonscan.com/api';
-
-    async function getTransactionsForAccount(account: string): Promise<any> {
-        try {
-            const response = await axios.get(API_ENDPOINT, {
-                params: {
-                    module: 'account',
-                    action: 'txlist',
-                    address: account,
-                    startblock: 0,
-                    endblock: 99999999,
-                    page: 1,
-                    offset: 100,
-                    sort: 'asc',
-                    apikey: 'CKIKS627NRN9YKDHUTUH8TRG7MNMQA8ERT',
-                },
-            });
-
-            console.log(response.data.result);
-
-            setTxs(response.data.result)
-            return response.data;
-        } catch (error: any) {
-            console.error(`Error fetching transactions for account ${account}: ${error.message}`);
-            throw error;
-        }
-    }
 
     async function getBalanceAPI(accounts: string): Promise<any> {
         try {
@@ -130,12 +105,14 @@ export default function Home() {
             setBalances(response.data.result)
             return response.data;
         } catch (error: any) {
-            console.error(`Error fetching transactions for account ${accounts}: ${error.message}`);
+            console.error(`Error fetching transactions for account ${account}: ${error.message}`);
             throw error;
         }
     }
     useEffect(() => {
-        getTransactionsForAccount(account)
+        getSwapsForAccount(account).then((swaps) => {
+            setTxs(swaps)
+        })
         getBalanceAPI(account)
 
         // Fetch the list of accounts and set them in state
@@ -279,28 +256,28 @@ export default function Home() {
                             </Card>
                         </CardLine>
                         <Table striped>
-                            <Table.Header>
-                                <Table.Column>From</Table.Column>
-                                <Table.Column>To</Table.Column>
-                                <Table.Column>Value</Table.Column>
-                                <Table.Column>Gas</Table.Column>
-                                <Table.Column>State</Table.Column>
-                            </Table.Header>
-                            <Table.Body>
-                                {txs.map((item, index) => (
-                                    <Table.Row key={index} >
-                                        <Table.Cell>
-                                            <a href={`${POLYGON_MUMBAI_URL}${item['hash']}`}>
-                                                {item["from"]}</a>
-                                        </Table.Cell>
-                                        <Table.Cell>{item["to"]}</Table.Cell>
-                                        <Table.Cell>{item["value"]}</Table.Cell>
-                                        <Table.Cell>{item["gas"]}</Table.Cell>
-                                        <Table.Cell>{item["state"]}</Table.Cell>
-                                    </Table.Row>
-                                ))}
-                            </Table.Body>
-                        </Table>
+                <Table.Header>
+                    <Table.Column>From</Table.Column>
+                    <Table.Column>To</Table.Column>
+                    <Table.Column>Value</Table.Column>
+                    <Table.Column>Gas</Table.Column>
+                    <Table.Column>Value USD</Table.Column>
+                </Table.Header>
+                <Table.Body>
+                    {txs.map((item, index) => (
+                        <Table.Row key={index} >
+                            <Table.Cell>
+                                <a href={`${POLYGON_MUMBAI_URL}${item.transaction.id}`}>
+                                    {item.origin}</a>
+                            </Table.Cell>
+                            <Table.Cell>{item.recipient}</Table.Cell>
+                            <Table.Cell>{item.amount0}</Table.Cell>
+                            <Table.Cell>{item.transaction.gasUsed}</Table.Cell>
+                            <Table.Cell>{item.amountUSD}</Table.Cell>
+                        </Table.Row>
+                    ))}
+                </Table.Body>
+            </Table>
                     </div>
                     ) :
                     (<Button className="metamaskButton" onPress={connectWallet} css={{
