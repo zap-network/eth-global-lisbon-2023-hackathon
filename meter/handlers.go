@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo"
 )
@@ -24,6 +25,33 @@ func EditConfig(c echo.Context) error {
 	if err := c.Bind(&json); err != nil {
 		return err
 	}
+
+	newTimeVal, ok := json["timeToCheck"].(string)
+	if ok {
+		newTime, err := strconv.Atoi(newTimeVal)
+		if err != nil {
+			return c.String(http.StatusOK, fmt.Sprintf("%v", json))
+		}
+		ConfigGlobal.IntervalToCheck = newTime
+	}
+
+	newCurrentConsumptionRateHourVal, ok := json["timeToCheck"].(string)
+	if ok {
+		newCurrentConsumptionRateHour, err := strconv.Atoi(newCurrentConsumptionRateHourVal)
+		if err != nil {
+			return c.String(http.StatusOK, fmt.Sprintf("%v", json))
+		}
+		ConfigGlobal.ConsumptionRateHour = newCurrentConsumptionRateHour
+	}
+
+	newCurrentProductionRateHourVal, ok := json["timeToCheck"].(string)
+	if ok {
+		newCurrentProductionRateHour, err := strconv.Atoi(newCurrentProductionRateHourVal)
+		if err != nil {
+			return c.String(http.StatusOK, fmt.Sprintf("%v", json))
+		}
+		ConfigGlobal.ConsumptionRateHour = newCurrentProductionRateHour
+	}
+
 	return c.String(http.StatusOK, fmt.Sprintf("%v", json))
-	//return c.String(http.StatusOK, "OK")
 }

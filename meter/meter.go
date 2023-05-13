@@ -24,31 +24,35 @@ var ConfigGlobal = config{}
 type config struct {
 	ProdutionRateHour   int `yaml:"currentProductionRateHour"`
 	ConsumptionRateHour int `yaml:"currentConsumptionRateHour"`
+	IntervalToCheck     int `yaml:"timeToCheck"`
 }
 
 func main() {
 
-	cfg, err := initConfig()
+	err := initConfig()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%+v", cfg)
-	//go startEcho()
+
+	fmt.Printf("%+v", ConfigGlobal)
+
+	go startEcho()
 	account := common.HexToAddress("0x18e2CeE48035F4558Eb75a629C37d713EFC005c2")
 	readContract(account)
 	//recordProduction(account)
-	recordConsumption(account)
-	readContract(account)
+	//recordConsumption(account)
+	//readContract(account)
+	go calculateBalance()
 	//go produceCounter()
 	//go consumptionCounter()
-	//select {}
+	select {}
 }
 
-func initConfig() (config, error) {
+func initConfig() error {
 
 	f, err := os.Open("config.yml")
 	if err != nil {
-		return config{}, err
+		return err
 	}
 
 	defer f.Close()
@@ -56,10 +60,10 @@ func initConfig() (config, error) {
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&ConfigGlobal)
 	if err != nil {
-		return config{}, nil
+		return err
 	}
 
-	return ConfigGlobal, nil
+	return nil
 }
 
 func startEcho() {
@@ -86,6 +90,19 @@ func consumptionCounter() {
 		time.Sleep(10 * time.Second)
 		CurrentProduction += 1
 		fmt.Printf("\n CurrentProduction %+v \n", CurrentProduction)
+	}
+}
+
+func calculateBalance() {
+	for {
+		consumption := ConfigGlobal.ProdutionRateHour - ConfigGlobal.ConsumptionRateHour
+		time.Sleep(time.Duration(ConfigGlobal.IntervalToCheck) * time.Second)
+
+		if consumption >= 0 {
+			fmt.Printf("\nNet positive %+v\n", consumption)
+		} else {
+			fmt.Printf("\nNet negative %+v\n", consumption)
+		}
 	}
 }
 
