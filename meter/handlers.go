@@ -39,7 +39,7 @@ func EditConfig(c echo.Context) error {
 	if ok {
 		newCurrentConsumptionRateHour, err := strconv.Atoi(newCurrentConsumptionRateHourVal)
 		if err != nil {
-			return c.String(http.StatusOK, fmt.Sprintf("%v", json))
+			return c.String(http.StatusOK, fmt.Sprintf("%+v", json))
 		}
 		ConfigGlobal.ConsumptionRateHour = newCurrentConsumptionRateHour
 	}
@@ -48,7 +48,7 @@ func EditConfig(c echo.Context) error {
 	if ok {
 		newCurrentProductionRateHour, err := strconv.Atoi(newCurrentProductionRateHourVal)
 		if err != nil {
-			return c.String(http.StatusOK, fmt.Sprintf("%v", json))
+			return c.String(http.StatusOK, fmt.Sprintf("%+v", json))
 		}
 		ConfigGlobal.ConsumptionRateHour = newCurrentProductionRateHour
 	}
