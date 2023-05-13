@@ -105,7 +105,7 @@ export default function Home() {
             setBalances(response.data.result)
             return response.data;
         } catch (error: any) {
-            console.error(`Error fetching transactions for account ${account}: ${error.message}`);
+            console.error(`Error fetching transactions for account ${accounts}: ${error.message}`);
             throw error;
         }
     }
@@ -256,28 +256,28 @@ export default function Home() {
                             </Card>
                         </CardLine>
                         <Table striped>
-                <Table.Header>
-                    <Table.Column>From</Table.Column>
-                    <Table.Column>To</Table.Column>
-                    <Table.Column>Value</Table.Column>
-                    <Table.Column>Gas</Table.Column>
-                    <Table.Column>Value USD</Table.Column>
-                </Table.Header>
-                <Table.Body>
-                    {txs.map((item, index) => (
-                        <Table.Row key={index} >
-                            <Table.Cell>
-                                <a href={`${POLYGON_MUMBAI_URL}${item.transaction.id}`}>
-                                    {item.origin}</a>
-                            </Table.Cell>
-                            <Table.Cell>{item.recipient}</Table.Cell>
-                            <Table.Cell>{item.amount0}</Table.Cell>
-                            <Table.Cell>{item.transaction.gasUsed}</Table.Cell>
-                            <Table.Cell>{item.amountUSD}</Table.Cell>
-                        </Table.Row>
-                    ))}
-                </Table.Body>
-            </Table>
+                            <Table.Header>
+                                <Table.Column>From</Table.Column>
+                                <Table.Column>To</Table.Column>
+                                <Table.Column>Value</Table.Column>
+                                <Table.Column>Gas</Table.Column>
+                                <Table.Column>Value USD</Table.Column>
+                            </Table.Header>
+                            <Table.Body>
+                                {txs.map((item, index) => (
+                                    <Table.Row key={index} >
+                                        <Table.Cell>
+                                            <a href={`${POLYGON_MUMBAI_URL}${item.transaction.id}`}>
+                                                {item.origin}</a>
+                                        </Table.Cell>
+                                        <Table.Cell>{item.recipient}</Table.Cell>
+                                        <Table.Cell>{item.amount0}</Table.Cell>
+                                        <Table.Cell>{item.transaction.gasUsed}</Table.Cell>
+                                        <Table.Cell>{item.amountUSD}</Table.Cell>
+                                    </Table.Row>
+                                ))}
+                            </Table.Body>
+                        </Table>
                     </div>
                     ) :
                     (<Button className="metamaskButton" onPress={connectWallet} css={{
