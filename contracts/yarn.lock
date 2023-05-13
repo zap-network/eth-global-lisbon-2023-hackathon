@@ -2133,6 +2133,8 @@
   "version" "0.12.0"
 
 "catering@^2.0.0":
+  "integrity" "sha512-M5imwzQn6y+ODBfgi+cfgZv2hIUI6oYU/0f35Mdb1ujGeqeoI5tOnl9Q13DTH7LW+7er+NYq8stNOKZD/Z3U/A=="
+  "resolved" "https://registry.npmjs.org/catering/-/catering-2.1.0.tgz"
   "version" "2.1.0"
   dependencies:
     "queue-tick" "^1.0.0"
@@ -5014,6 +5016,8 @@
   "version" "1.2.3"
 
 "queue-tick@^1.0.0":
+  "integrity" "sha512-ULWhjjE8BmiICGn3G8+1L9wFpERNxkf8ysxkAer4+TFdRefDaXOCV5m92aMB9FtBVmn/8sETXLXY6BfW7hyaWQ=="
+  "resolved" "https://registry.npmjs.org/queue-tick/-/queue-tick-1.0.0.tgz"
   "version" "1.0.0"
 
 "randombytes@^2.0.1", "randombytes@^2.1.0":
