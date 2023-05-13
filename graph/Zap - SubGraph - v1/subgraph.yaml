@@ -1,0 +1,24 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Uniswap
+    network: mumbai
+    source:
+      address: "0x4648a43B2C14Da09FdF82B161150d3F634f40491"
+      abi: Uniswap
+      startBlock: 35545094
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - RewardsSent
+      abis:
+        - name: Uniswap
+          file: ./abis/Uniswap.json
+      eventHandlers:
+        - event: RewardsSent(uint256)
+          handler: handleRewardsSent
+      file: ./src/uniswap.ts
