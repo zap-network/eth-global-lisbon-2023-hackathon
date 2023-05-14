@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math/big"
 	"os"
@@ -44,6 +45,16 @@ func main() {
 	if wallet == nil {
 		log.Fatal("init wallet failed")
 	}
+
+	input := Inputs{
+		reserve: big.NewInt(100),
+		balance: big.NewInt(80),
+	}
+	action, err := computeAction(client, wallet, input)
+	if err != nil {
+		log.Fatal("Failed to compute action: ", err)
+	}
+	fmt.Printf("Action: %+v\n", action)
 
 	//buyZap(client, wallet)
 }
@@ -94,14 +105,21 @@ func computeAction(client *ethclient.Client, wallet *helper.Wallet, input Inputs
 	reserveLowerBound := new(big.Int).Sub(input.reserve, threshold)
 	reserveUpperBound := new(big.Int).Add(input.reserve, threshold)
 
+	fmt.Printf("Current balance: %d\n", input.balance)
+	fmt.Printf("Reserve bounds: [%d, %d]\n", reserveLowerBound, reserveUpperBound)
+
 	if input.balance.Cmp(reserveLowerBound) <= 0 {
 		// buy Zap tokens
 		deficit := new(big.Int).Sub(reserveUpperBound, input.balance)
 
-		buyZap(client, wallet, deficit)
+		fmt.Printf("Attempting to buy %d Zap tokens\n", deficit)
+		//buyZap(client, wallet, deficit)
+		return BuyAction, nil
+	} else {
+		fmt.Println("No action necessary")
+		return NoAction, nil
 	}
 
 	//swapValue := helper.FloatStringToBigInt("0.001", 18)
-
 	return NoAction, nil
 }
