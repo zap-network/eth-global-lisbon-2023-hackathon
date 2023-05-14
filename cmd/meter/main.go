@@ -23,7 +23,12 @@ func main() {
 
 	go startEcho()
 
-	common.ReadContract(Account)
+	balance, err := common.ReadContract(Account)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("\n\n balanceOf %+v \n\n", balance)
+
 	go common.CalculateBalance()
 	select {}
 }

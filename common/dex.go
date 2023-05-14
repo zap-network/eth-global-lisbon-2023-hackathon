@@ -15,7 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func buyZap(client *ethclient.Client, wallet *helper.Wallet, amount *big.Int) {
+func BuyZap(client *ethclient.Client, wallet *helper.Wallet, amount *big.Int) {
 	pool, err := helper.ConstructV3Pool(client, MaticToken, ZapToken, uint64(constants.FeeLowest))
 	if err != nil {
 		log.Fatal("Error detecting pool: ", err)

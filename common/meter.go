@@ -65,7 +65,7 @@ func CalculateBalance() {
 	}
 }
 
-func ReadContract(account common.Address) {
+func ReadContract(account common.Address) (*big.Int, error) {
 
 	client, err := ethclient.Dial(PolygonTestnetURL)
 	if err != nil {
@@ -82,8 +82,7 @@ func ReadContract(account common.Address) {
 		panic(err)
 	}
 
-	fmt.Printf("\n\n balanceOf %+v \n\n", bal)
-
+	return bal, nil
 }
 
 func recordProduction(account common.Address, amount float64) {
