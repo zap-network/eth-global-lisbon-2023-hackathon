@@ -522,14 +522,15 @@ export default function Home() {
     }
 
     useEffect(() => {
-        if (account != "") {
             const intervalId = setInterval(() => {
+                setAccount(account => account);
+                if (account != "") {
                 getSwapsForAccount(account).then((swaps) => {
                     setTxs(swaps)
                 })
                 getBalance(account)
+            }
             }, 10000);
-        }
     }, []);
 
     async function getBalance(address: string): Promise<string> {
