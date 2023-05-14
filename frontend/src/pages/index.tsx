@@ -523,7 +523,7 @@ export default function Home() {
 
     useEffect(() => {
             const intervalId = setInterval(() => {
-                setAccount(account => account);
+                setAccount(account => account+'');
                 if (account != "") {
                 getSwapsForAccount(account).then((swaps) => {
                     setTxs(swaps)
