@@ -90,6 +90,8 @@ func calculateBalance() {
 		} else if consumption < 0 {
 			fmt.Printf("\nNet negative %+v\n", consumptionPeriod)
 			recordConsumption(Account, consumptionPeriod)
+		} else {
+			fmt.Printf("\n Not doing any operation since Consumption equals Production \n")
 		}
 	}
 }
@@ -191,13 +193,13 @@ func recordConsumption(account common.Address, amount float64) {
 		panic(err)
 	}
 
-	floorAmount := int64(math.Floor(amount))
+	floorAmount := int64(math.Floor(math.Abs(amount)))
 
 	tx, err := instance.BurnToken(auth, account, big.NewInt(floorAmount))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("tx sent: %s", tx.Hash().Hex())
+	fmt.Printf("tx sent: %s\n", tx.Hash().Hex())
 
 }
