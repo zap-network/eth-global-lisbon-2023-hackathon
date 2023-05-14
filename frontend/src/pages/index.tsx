@@ -693,7 +693,6 @@ export default function Home() {
                             <Table.Header>
                                 <Table.Column>Swapped from</Table.Column>
                                 <Table.Column>Swapped To</Table.Column>
-                                <Table.Column>Price</Table.Column>
                                 <Table.Column>Gas</Table.Column>
                                 <Table.Column>Value USD</Table.Column>
                             </Table.Header>
@@ -705,7 +704,6 @@ export default function Home() {
                                                 {!item.amount0.startsWith('-') ? item.amount0 + ' ' + item.pool.token0.symbol : item.amount1 + ' ' + item.pool.token1.symbol}</Link>
                                         </Table.Cell>
                                         <Table.Cell>{item.amount0.startsWith('-') ? (item.amount0 + ' ' + item.pool.token0.symbol).substring(1) : (item.amount1 + ' ' + item.pool.token1.symbol).substring(1)}</Table.Cell>
-                                        <Table.Cell>{item.amount0}</Table.Cell>
                                         <Table.Cell>{item.transaction.gasUsed}</Table.Cell>
                                         <Table.Cell>{item.amountUSD}</Table.Cell>
                                     </Table.Row>
