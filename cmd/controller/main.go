@@ -5,12 +5,14 @@ import (
 	"log"
 	"math/big"
 	"os"
+	"time"
 
 	coreEntities "github.com/daoleno/uniswap-sdk-core/entities"
 	"github.com/daoleno/uniswapv3-sdk/examples/helper"
-	"github.com/ethereum/go-ethereum/common"
+	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/labstack/echo"
+	"github.com/zap/common"
 	"gopkg.in/yaml.v2"
 )
 
@@ -19,8 +21,8 @@ const POLYGON_TESTNET_CHAINID = 80001
 const ZapAddress = "0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7"
 const WMumbaiMaticAddress = "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889"
 
-var ZapToken = coreEntities.NewToken(POLYGON_TESTNET_CHAINID, common.HexToAddress(ZapAddress), 18, "Zap", "Zap")
-var MaticToken = coreEntities.NewToken(POLYGON_TESTNET_CHAINID, common.HexToAddress(WMumbaiMaticAddress), 18, "Matic", "Matic Network(PolyGon)")
+var ZapToken = coreEntities.NewToken(POLYGON_TESTNET_CHAINID, gethcommon.HexToAddress(ZapAddress), 18, "Zap", "Zap")
+var MaticToken = coreEntities.NewToken(POLYGON_TESTNET_CHAINID, gethcommon.HexToAddress(WMumbaiMaticAddress), 18, "Matic", "Matic Network(PolyGon)")
 
 type config struct {
 	ProdutionRateHour   int `yaml:"currentProductionRateHour"`
@@ -45,17 +47,30 @@ func main() {
 		log.Fatal("init wallet failed")
 	}
 
-	input := Inputs{
-		reserve: big.NewInt(100),
-		balance: big.NewInt(80),
-	}
-	action, err := computeAction(client, wallet, input)
-	if err != nil {
-		log.Fatal("Failed to compute action: ", err)
-	}
-	fmt.Printf("Action: %+v\n", action)
+	for {
+		balance, err := common.ReadContract(wallet.PublicKey)
+		if err != nil {
+			log.Fatal("Failed to read balance: ", err)
+		}
 
-	//buyZap(client, wallet)
+		input := Inputs{
+			reserve: big.NewInt(100),
+			balance: balance,
+		}
+		action, amount, err := computeAction(client, wallet, input)
+		if err != nil {
+			log.Fatal("Failed to compute action: ", err)
+		}
+
+		fmt.Printf("Action: %+v\n", action)
+		if action == BuyAction {
+			common.BuyZap(client, wallet, amount)
+		}
+
+		fmt.Println()
+		time.Sleep(time.Duration(1) * time.Second)
+	}
+
 }
 
 func startEcho() {
@@ -98,7 +113,7 @@ const (
 	BuyAction
 )
 
-func computeAction(client *ethclient.Client, wallet *helper.Wallet, input Inputs) (MarketAction, error) {
+func computeAction(client *ethclient.Client, wallet *helper.Wallet, input Inputs) (MarketAction, *big.Int, error) {
 
 	threshold := new(big.Int).Div(new(big.Int).Mul(input.reserve, big.NewInt(1)), big.NewInt(10))
 	reserveLowerBound := new(big.Int).Sub(input.reserve, threshold)
@@ -113,12 +128,11 @@ func computeAction(client *ethclient.Client, wallet *helper.Wallet, input Inputs
 
 		fmt.Printf("Attempting to buy %d Zap tokens\n", deficit)
 		//buyZap(client, wallet, deficit)
-		return BuyAction, nil
+		return BuyAction, deficit, nil
 	} else {
 		fmt.Println("No action necessary")
-		return NoAction, nil
+		return NoAction, nil, nil
 	}
 
 	//swapValue := helper.FloatStringToBigInt("0.001", 18)
-	return NoAction, nil
 }
