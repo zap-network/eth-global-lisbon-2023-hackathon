@@ -54,7 +54,7 @@ func main() {
 		}
 
 		input := Inputs{
-			reserve: big.NewInt(100),
+			reserve: big.NewInt(1000),
 			balance: balance,
 		}
 		action, amount, err := computeAction(client, wallet, input)

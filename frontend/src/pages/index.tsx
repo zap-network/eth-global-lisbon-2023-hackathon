@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import axios from 'axios';
 import { Button, Text, Card, Table } from "@nextui-org/react";
 import styled from 'styled-components';
-import { GiLightningHelix } from "react-icons/gi";
+import { BsFillLightningChargeFill } from "react-icons/bs";
 import { IoMdCog } from 'react-icons/io';
 import Link from "next/link";
 
@@ -468,10 +468,10 @@ export default function Home() {
 
         let productionRateHourInput = document.getElementById('productionRateHourInput')?.value
         let consumptionRateHourInput = document.getElementById('consumptionRateHourInput')?.value
-        
+
         let request = {
-         "currentProductionRateHour": productionRateHourInput,
-         "currentConsumptionRateHour": consumptionRateHourInput,
+            "currentProductionRateHour": productionRateHourInput,
+            "currentConsumptionRateHour": consumptionRateHourInput,
         }
         saveConfigs(request)
         handleCloseModal();
@@ -520,8 +520,9 @@ export default function Home() {
     async function saveConfigs(data: any): Promise<any> {
         axios.post('http://localhost:8082/config', data, {
             headers: {
-              'Content-Type': 'application/json'
-            }})
+                'Content-Type': 'application/json'
+            }
+        })
             .then((response: { data: any; }) => {
                 console.log(response.data);
                 return response.data;
@@ -539,9 +540,9 @@ export default function Home() {
                 getSwapsForAccount(account).then((swaps) => {
                     setTxs(swaps)
                 })
-                getBalance(account)
+                getBalance(account).then(setBalances)
             }
-        }, 3000);
+        }, 1000);
     }, [account]);
 
     async function getBalance(address: string): Promise<string> {
@@ -632,8 +633,8 @@ export default function Home() {
             {
                 account != '' ?
                     (<Container>
-                        <TitleContainer><TitleLeftPane><Title><GiLightningHelix size={48} color="yellow" />Zap Token</Title></TitleLeftPane>
-                            <TitleRightPane onClick={handleOpenModal}><IoMdCog size={48} color="yellow" />
+                        <TitleContainer><TitleLeftPane><Title><BsFillLightningChargeFill size={48} color="orange" />Zap Token</Title></TitleLeftPane>
+                            <TitleRightPane onClick={handleOpenModal}><IoMdCog size={48} color="orange" />
                                 {isModalOpen && (<div>
                                     <Modal
                                         closeButton
@@ -645,7 +646,7 @@ export default function Home() {
                                         <Modal.Header>
                                             <Text id="modal-title" size={18}>
                                                 <Text b size={18}>
-                                                Configuration Settings
+                                                    Configuration Settings
                                                 </Text>
                                             </Text>
                                         </Modal.Header>
@@ -676,10 +677,10 @@ export default function Home() {
                                             />
                                         </Modal.Body>
                                         <Modal.Footer>
-                                            <Button auto flat color="error" onPress={handleCloseModal} css={{backgroundColor: "unset !important"}}>
+                                            <Button auto flat color="error" onPress={handleCloseModal} css={{ backgroundColor: "unset !important" }}>
                                                 Close
                                             </Button>
-                                            <Button auto onPress={onSubmit}  css={{backgroundColor: "#0072F5 !important"}}>
+                                            <Button auto onPress={onSubmit} css={{ backgroundColor: "#0072F5 !important" }}>
                                                 Submit
                                             </Button>
                                         </Modal.Footer>

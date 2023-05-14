@@ -1,3 +1,3 @@
-currentProductionRateHour: 100 #w/h
-currentConsumptionRateHour: 50 #w/h
+currentProductionRateHour: 1000 #w/h
+currentConsumptionRateHour: 1000 #w/h
 timeToCheck: 10 #seconds

@@ -120,7 +120,7 @@ func recordProduction(account common.Address, amount float64) {
 
 	floorAmount := int64(math.Floor(amount))
 
-	tx, err := instance.IssueToken(auth, account, big.NewInt(floorAmount))
+	tx, err := instance.IssueToken(auth, wallet.address, big.NewInt(floorAmount))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -163,7 +163,7 @@ func recordConsumption(account common.Address, amount float64) {
 
 	floorAmount := int64(math.Floor(math.Abs(amount)))
 
-	tx, err := instance.BurnToken(auth, account, big.NewInt(floorAmount))
+	tx, err := instance.BurnToken(auth, wallet.address, big.NewInt(floorAmount))
 	if err != nil {
 		log.Fatal(err)
 	}
