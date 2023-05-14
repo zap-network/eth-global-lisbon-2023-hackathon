@@ -62,7 +62,6 @@ func main() {
 			log.Fatal("Failed to compute action: ", err)
 		}
 
-		fmt.Printf("Action: %+v\n", action)
 		if action == BuyAction {
 			common.BuyZap(client, wallet, amount)
 		}
@@ -119,17 +118,16 @@ func computeAction(client *ethclient.Client, wallet *helper.Wallet, input Inputs
 	reserveLowerBound := new(big.Int).Sub(input.reserve, threshold)
 	reserveUpperBound := new(big.Int).Add(input.reserve, threshold)
 
-	fmt.Printf("Current balance: %d\n", input.balance)
-	fmt.Printf("Reserve bounds: [%d, %d]\n", reserveLowerBound, reserveUpperBound)
-
 	if input.balance.Cmp(reserveLowerBound) <= 0 {
 		// buy Zap tokens
 		deficit := new(big.Int).Sub(reserveUpperBound, input.balance)
 
+		fmt.Printf("Balance of %d is outside of the bounds [%d, %d]\n", input.balance, reserveLowerBound, reserveUpperBound)
 		fmt.Printf("Attempting to buy %d Zap tokens\n", deficit)
 		//buyZap(client, wallet, deficit)
 		return BuyAction, deficit, nil
 	} else {
+		fmt.Printf("Balance of %d is within the bounds [%d, %d]\n", input.balance, reserveLowerBound, reserveUpperBound)
 		fmt.Println("No action necessary")
 		return NoAction, nil, nil
 	}

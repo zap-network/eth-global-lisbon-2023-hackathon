@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"log"
 	"math/big"
 	"time"
@@ -37,16 +36,16 @@ func swapZapMatic(client *ethclient.Client, wallet *helper.Wallet, token *coreEn
 		log.Fatal("Error detecting pool: ", err)
 	}
 
-	p, err := pool.PriceOf(ZapToken)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%+v\n", p)
-	fmt.Printf("%d\n", big.NewInt(1).Div(new(big.Int).Mul(p.Numerator, big.NewInt(10000)), new(big.Int).Mul(p.Denominator, big.NewInt(10000))))
-	fmt.Printf("Fraction: %d/%d\n", p.Numerator, p.Denominator)
-	fmt.Printf("Base Currency: %s\n", p.BaseCurrency.Symbol())
-	fmt.Printf("Quote Currency: %s\n", p.QuoteCurrency.Symbol())
-	fmt.Printf("Scalar Fraction: %d/%d\n", p.Scalar.Numerator, p.Scalar.Denominator)
+	//p, err := pool.PriceOf(ZapToken)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Printf("%+v\n", p)
+	//fmt.Printf("%d\n", big.NewInt(1).Div(new(big.Int).Mul(p.Numerator, big.NewInt(10000)), new(big.Int).Mul(p.Denominator, big.NewInt(10000))))
+	//fmt.Printf("Fraction: %d/%d\n", p.Numerator, p.Denominator)
+	//fmt.Printf("Base Currency: %s\n", p.BaseCurrency.Symbol())
+	//fmt.Printf("Quote Currency: %s\n", p.QuoteCurrency.Symbol())
+	//fmt.Printf("Scalar Fraction: %d/%d\n", p.Scalar.Numerator, p.Scalar.Denominator)
 
 	//0.01%
 	slippageTolerance := coreEntities.NewPercent(big.NewInt(1), big.NewInt(1000))

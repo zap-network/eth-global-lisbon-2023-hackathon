@@ -51,16 +51,16 @@ func CalculateBalance() {
 		consumption := ConfigGlobal.ProductionRateHour - ConfigGlobal.ConsumptionRateHour
 
 		consumptionPeriod := (float64(ConfigGlobal.IntervalToCheck) / 60) * float64(consumption)
-		fmt.Printf("%+v", consumptionPeriod)
+		//fmt.Printf("%+v", consumptionPeriod)
 
 		if consumptionPeriod > 0 {
-			fmt.Printf("\nNet positive %+v\n", consumptionPeriod)
+			fmt.Printf("Net positive %+v\n", consumptionPeriod)
 			recordProduction(Account, consumptionPeriod)
 		} else if consumption < 0 {
-			fmt.Printf("\nNet negative %+v\n", consumptionPeriod)
+			fmt.Printf("Net negative %+v\n", consumptionPeriod)
 			recordConsumption(Account, consumptionPeriod)
 		} else {
-			fmt.Printf("\n Not doing any operation since Consumption equals Production \n")
+			fmt.Printf("Not doing any operation since Consumption equals Production \n")
 		}
 	}
 }
