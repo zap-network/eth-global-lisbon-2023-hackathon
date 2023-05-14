@@ -23,7 +23,7 @@ var CurrentProduction = 0
 var ConfigGlobal = config{}
 
 type config struct {
-	ProdutionRateHour   int `yaml:"currentProductionRateHour"`
+	ProductionRateHour  int `yaml:"currentProductionRateHour"`
 	ConsumptionRateHour int `yaml:"currentConsumptionRateHour"`
 	IntervalToCheck     int `yaml:"timeToCheck"`
 }
@@ -97,13 +97,18 @@ func consumptionCounter() {
 
 func calculateBalance() {
 	for {
-		consumption := ConfigGlobal.ProdutionRateHour - ConfigGlobal.ConsumptionRateHour
 		time.Sleep(time.Duration(ConfigGlobal.IntervalToCheck) * time.Second)
+		consumption := ConfigGlobal.ProductionRateHour - ConfigGlobal.ConsumptionRateHour
 
-		if consumption >= 0 {
-			fmt.Printf("\nNet positive %+v\n", consumption)
+		consumptionPeriod := (float32(ConfigGlobal.IntervalToCheck) / 60) * float32(consumption)
+		fmt.Printf("%+v", consumptionPeriod)
+
+		if consumptionPeriod >= 0 {
+			fmt.Printf("\nNet positive %+v\n", consumptionPeriod)
+			recordProduction(common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7"))
 		} else {
-			fmt.Printf("\nNet negative %+v\n", consumption)
+			fmt.Printf("\nNet negative %+v\n", consumptionPeriod)
+			recordConsumption(common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7"))
 		}
 	}
 }
@@ -112,7 +117,7 @@ func readContract(account common.Address) {
 
 	client, err := ethclient.Dial("https://polygon-testnet-rpc.allthatnode.com:8545")
 	if err != nil {
-		// handle error
+		panic(err)
 	}
 
 	address := common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
