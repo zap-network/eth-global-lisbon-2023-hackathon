@@ -7,11 +7,12 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo"
+	"github.com/zap/common"
 )
 
 func ViewConfig(c echo.Context) error {
 
-	cfg, err := json.Marshal(ConfigGlobal)
+	cfg, err := json.Marshal(common.ConfigGlobal)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "No configs")
@@ -32,7 +33,7 @@ func EditConfig(c echo.Context) error {
 		if err != nil {
 			return c.String(http.StatusOK, fmt.Sprintf("%v", json))
 		}
-		ConfigGlobal.IntervalToCheck = newTime
+		common.ConfigGlobal.IntervalToCheck = newTime
 	}
 
 	newCurrentConsumptionRateHourVal, ok := json["currentConsumptionRateHour"].(string)
@@ -41,7 +42,7 @@ func EditConfig(c echo.Context) error {
 		if err != nil {
 			return c.String(http.StatusOK, fmt.Sprintf("%+v", json))
 		}
-		ConfigGlobal.ConsumptionRateHour = newCurrentConsumptionRateHour
+		common.ConfigGlobal.ConsumptionRateHour = newCurrentConsumptionRateHour
 	}
 
 	newCurrentProductionRateHourVal, ok := json["currentProductionRateHour"].(string)
@@ -50,7 +51,7 @@ func EditConfig(c echo.Context) error {
 		if err != nil {
 			return c.String(http.StatusOK, fmt.Sprintf("%+v", json))
 		}
-		ConfigGlobal.ConsumptionRateHour = newCurrentProductionRateHour
+		common.ConfigGlobal.ConsumptionRateHour = newCurrentProductionRateHour
 	}
 
 	return c.String(http.StatusOK, fmt.Sprintf("%v", json))

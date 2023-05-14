@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"context"
@@ -12,17 +12,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 )
 
-var ControllerPort = ":8082"
-var CurrentConsumption = 0
-var CurrentProduction = 0
-
-var ConfigGlobal = config{}
-var ZapToken = common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
 var Account = common.HexToAddress("0xB8eD17D5a8954c6ef683721E72752e4aAB9E92D8")
 var MumbaiChainID = int64(80001)
 var PolygonTestnetURL = "https://polygon-testnet-rpc.allthatnode.com:8545"
@@ -33,23 +25,9 @@ type config struct {
 	IntervalToCheck     int `yaml:"timeToCheck"`
 }
 
-func main() {
+var ConfigGlobal = config{}
 
-	err := initConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("%+v", ConfigGlobal)
-
-	go startEcho()
-
-	readContract(Account)
-	go calculateBalance()
-	select {}
-}
-
-func initConfig() error {
+func InitConfig() error {
 
 	f, err := os.Open("config.yml")
 	if err != nil {
@@ -67,16 +45,7 @@ func initConfig() error {
 	return nil
 }
 
-func startEcho() {
-	e := echo.New()
-	e.GET("/config", ViewConfig)
-	e.POST("/config", EditConfig)
-	e.Use(middleware.CORS())
-	e.Logger.Fatal(e.Start(ControllerPort))
-
-}
-
-func calculateBalance() {
+func CalculateBalance() {
 	for {
 		time.Sleep(time.Duration(ConfigGlobal.IntervalToCheck) * time.Second)
 		consumption := ConfigGlobal.ProductionRateHour - ConfigGlobal.ConsumptionRateHour
@@ -96,14 +65,14 @@ func calculateBalance() {
 	}
 }
 
-func readContract(account common.Address) {
+func ReadContract(account common.Address) {
 
 	client, err := ethclient.Dial(PolygonTestnetURL)
 	if err != nil {
 		panic(err)
 	}
 
-	instance, err := NewZap(ZapToken, client)
+	instance, err := NewZap(ZapAddress, client)
 	if err != nil {
 		panic(err)
 	}
@@ -145,7 +114,7 @@ func recordProduction(account common.Address, amount float64) {
 	auth.GasLimit = uint64(300000) // in units
 	auth.GasPrice = gasPrice
 
-	instance, err := NewZap(ZapToken, client)
+	instance, err := NewZap(ZapAddress, client)
 	if err != nil {
 		panic(err)
 	}
@@ -188,7 +157,7 @@ func recordConsumption(account common.Address, amount float64) {
 	auth.GasLimit = uint64(300000) // in units
 	auth.GasPrice = gasPrice
 
-	instance, err := NewZap(ZapToken, client)
+	instance, err := NewZap(ZapAddress, client)
 	if err != nil {
 		panic(err)
 	}

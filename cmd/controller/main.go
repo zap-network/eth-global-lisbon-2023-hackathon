@@ -6,13 +6,12 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/labstack/echo"
-	"gopkg.in/yaml.v2"
-
 	coreEntities "github.com/daoleno/uniswap-sdk-core/entities"
 	"github.com/daoleno/uniswapv3-sdk/examples/helper"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/labstack/echo"
+	"gopkg.in/yaml.v2"
 )
 
 const POLYGON_TESTNET = "https://polygon-testnet-rpc.allthatnode.com:8545"
