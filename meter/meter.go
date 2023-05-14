@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"gopkg.in/yaml.v3"
 )
 
@@ -68,8 +69,9 @@ func initConfig() error {
 
 func startEcho() {
 	e := echo.New()
-	e.GET("/ViewConfig", ViewConfig)
-	e.POST("/EditConfig", EditConfig)
+	e.GET("/config", ViewConfig)
+	e.POST("/config", EditConfig)
+	e.Use(middleware.CORS())
 	e.Logger.Fatal(e.Start(ControllerPort))
 
 }
