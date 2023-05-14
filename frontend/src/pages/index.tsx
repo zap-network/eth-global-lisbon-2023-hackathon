@@ -8,6 +8,8 @@ import { Web3ModalButton } from "../components/Web3ModalButton.tsx";
 import { useState, useEffect } from 'react';
 import { connect } from './metamask.ts';
 import FormModal from '../components/FormModal';
+import { Modal, Input } from "@nextui-org/react";
+import { useForm } from "react-hook-form";
 
 
 import axios from 'axios';
@@ -15,6 +17,7 @@ import { Card, Table, Text, Row, Button } from "@nextui-org/react";
 import styled from 'styled-components';
 import { GiLightningHelix } from "react-icons/gi";
 import { IoMdCog } from 'react-icons/io';
+import Link from "next/link";
 
 // import erc20ABI from '../../../contracts/zap.abi';
 // const { erc20ABI } = require('../../../contracts/zap.abi');
@@ -418,12 +421,24 @@ const IndexPage = styled.div`
     }
     }
 `
+const Container = styled.div`
+    
+`
+const TitleContainer = styled.div`
+    width: 100%;
+    overflow: hidden;
+
+`
 const TitleLeftPane = styled.div`
     float: left;
 `
 
 const TitleRightPane = styled.div`
     float: right;
+`
+
+
+const Form = styled.form`
 `
 
 const Title = styled.h1`
@@ -454,6 +469,17 @@ export default function Home() {
     const [txs, setTxs] = useState<Swap[]>([]);
 
     const [configs, setConfigs] = useState<{}>({});
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<FormData>();
+
+    const onSubmit = (data: FormData) => {
+        console.log(data);
+        handleCloseModal();
+    };
 
     const API_ENDPOINT = 'https://api.polygonscan.com/api';
 
@@ -487,9 +513,7 @@ export default function Home() {
         try {
             const response = await axios.get("http://localhost:8082/config");
 
-            console.log(response.data.result);
-
-            setConfigs(response.data.result)
+            setConfigs(response.data)
             return response.data;
         } catch (error: any) {
             console.error(`Error fetching configs ${error.message}`);
@@ -503,8 +527,8 @@ export default function Home() {
                 getSwapsForAccount(account).then((swaps) => {
                     setTxs(swaps)
                 })
-                getBalanceAPI(account)
-            }, 1000);
+                getBalance(account)
+            }, 10000);
         }
     }, []);
 
@@ -512,15 +536,21 @@ export default function Home() {
 
         const contract = new web3.eth.Contract(erc20ABI, contractAddress);
         const balanceWei = await contract.methods.balanceOf(address).call();
-        // const balanceWei = await web3.eth.getBalance(address);
-
-        return web3.utils.fromWei(balanceWei, 'ether');;
+        return web3.utils.fromWei(balanceWei, 'ether');
     }
 
     useEffect(() => {
         getCurrentWalletConnected();
         addWalletListener();
         getConfigs();
+
+        if (configs && configs["IntervalToCheck"]) {
+            const interval = setInterval(() => {
+                getConfigs();
+    
+              }, configs["IntervalToCheck"]*1000)
+              return () => clearInterval(interval)
+        }
     }, [account]);
 
     const connectWallet = async () => {
@@ -580,28 +610,50 @@ export default function Home() {
         }
     };
 
-    function openModal() {
-
-    }
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const handleOpenModal = () => {
         setIsModalOpen(true);
-      };
-    
-      const handleCloseModal = () => {
+    };
+
+    const handleCloseModal = () => {
         setIsModalOpen(false);
-      };
+    };
 
     return (
         <IndexPage>
             {
                 account != '' ?
-                    (<div> <TitleLeftPane><Title><GiLightningHelix size={48} color="yellow" />Zap Token </Title></TitleLeftPane>
-                        <TitleRightPane onPress={openModal}><IoMdCog size={48} color="yellow" /> Settings
-                        <Button onPress={handleOpenModal}>Open Modal</Button>
-    {isModalOpen && <FormModal />}
-                        </TitleRightPane>
+                    (<Container>
+                        <TitleContainer><TitleLeftPane><Title><GiLightningHelix size={48} color="yellow" />Zap Token</Title></TitleLeftPane>
+                            <TitleRightPane onClick={handleOpenModal}><IoMdCog size={48} color="yellow" /> Settings
+                                {/* <Button onPress={handleOpenModal}>Open Modal</Button> */}
+                                {isModalOpen && (<Modal visible={isModalOpen} onClose={handleCloseModal}>
+                                    {/* <Modal.Title>Change settings</Modal.Title> */}
+                                    <Modal.Content>
+                                        {/* <Form onSubmit={handleSubmit(onSubmit)}> */}
+                                            {/* <Text block>Production Rate Hour</Text>
+                                            <Input
+                                                type="text"
+                                                placeholder="Enter the desired production rate hour"
+                                                {...register("name", { required: true })}
+                                            />
+                                            {errors.name && <Text block color="red">Name is required</Text>}
+                                            <Text block>Email</Text>
+                                            <Input
+                                                type="email"
+                                                placeholder="Enter the desired consupmtion rate hour"
+                                                {...register("email", { required: true })}
+                                            />
+                                            {errors.email && (
+                                                <Text block color="red">Email is required</Text>
+                                            )}
+                                            <Button type="submit">Submit</Button> */}
+                                        {/* </Form> */}
+                                    </Modal.Content>
+                                </Modal>)
+                                }
+                            </TitleRightPane>
+                        </TitleContainer>
                         <CardLine>
                             <Card>
                                 <Card.Header>
@@ -621,7 +673,7 @@ export default function Home() {
                                 <Card.Divider />
                                 <Card.Body css={{ py: "$10" }}>
                                     <Text b>
-                                        {configs} Watt/hour
+                                        {configs ? configs["ProdutionRateHour"] : ""} Watt/hour
                                     </Text>
                                 </Card.Body>
                             </Card>
@@ -632,12 +684,11 @@ export default function Home() {
                                 <Card.Divider />
                                 <Card.Body css={{ py: "$10" }}>
                                     <Text b>
-                                        {configs} Watt/hour
+                                        {configs ? configs["ConsumptionRateHour"] : ""} Watt/hour
                                     </Text>
                                 </Card.Body>
                             </Card>
                         </CardLine>
-                        {/* { txs ? (txs > 0 ? */}
                         <Table striped>
                             <Table.Header>
                                 <Table.Column>Swapped from</Table.Column>
@@ -647,11 +698,11 @@ export default function Home() {
                                 <Table.Column>Value USD</Table.Column>
                             </Table.Header>
                             <Table.Body>
-                                {txs.map((item, index) => (
+                                {txs.map((item: any, index: number) => (
                                     <Table.Row key={index} >
                                         <Table.Cell>
-                                            <a href={`${POLYGON_MUMBAI_URL}${item.transaction.id}`}>
-                                                {!item.amount0.startsWith('-') ? item.amount0 + ' ' + item.pool.token0.symbol : item.amount1 + ' ' + item.pool.token1.symbol}</a>
+                                            <Link href={`${POLYGON_MUMBAI_URL}${item.transaction.id}`}>
+                                                {!item.amount0.startsWith('-') ? item.amount0 + ' ' + item.pool.token0.symbol : item.amount1 + ' ' + item.pool.token1.symbol}</Link>
                                         </Table.Cell>
                                         <Table.Cell>{item.amount0.startsWith('-') ? (item.amount0 + ' ' + item.pool.token0.symbol).substring(1) : (item.amount1 + ' ' + item.pool.token1.symbol).substring(1)}</Table.Cell>
                                         <Table.Cell>{item.amount0}</Table.Cell>
@@ -661,7 +712,7 @@ export default function Home() {
                                 ))}
                             </Table.Body>
                         </Table>
-                    </div>
+                    </Container>
                     ) :
                     (<Button className="metamaskButton" onPress={connectWallet} css={{
                         position: "fixed",
