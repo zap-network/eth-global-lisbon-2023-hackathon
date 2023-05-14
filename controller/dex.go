@@ -45,7 +45,7 @@ func buyZap(client *ethclient.Client, wallet *helper.Wallet, amount *big.Int) {
 		log.Fatal(err)
 	}
 
-	trade, err := entities.FromRoute(r, coreEntities.FromRawAmount(MaticToken, &amount), coreEntities.ExactInput)
+	trade, err := entities.FromRoute(r, coreEntities.FromRawAmount(MaticToken, amount), coreEntities.ExactInput)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func buyZap(client *ethclient.Client, wallet *helper.Wallet, amount *big.Int) {
 	log.Printf("calldata = 0x%x\n", params.Value.String())
 
 	tx, err := helper.SendTX(client, common.HexToAddress(helper.ContractV3SwapRouterV1),
-		&amount, params.Calldata, wallet)
+		amount, params.Calldata, wallet)
 	if err != nil {
 		log.Fatal(err)
 	}
