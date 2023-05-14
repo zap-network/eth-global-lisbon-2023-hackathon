@@ -23,3 +23,11 @@ The ERC20 Zap token is deployed on:
 
 We also have a liquidity pool on Uniswap on Polygon Mumbai Testnet:
 * ZAP - WMATIC
+
+## Stuff that we wanted to develop but couldn't
+
+* We wanted to customize our ERC20 to only allow mints and burns in a permissioned way
+* We wanted to build more logic into the trading bot
+* We wanted to enhance the dApp with visual graphs of consumption and Zap historical prices
+* We wanted to decoupled the account used by the meter and the account used by the bot. This would allow segregation between the part controlled by the infrastructure provider and household client.
+* We wanted to have better and cleaner code 🙈.
