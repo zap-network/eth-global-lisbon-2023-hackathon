@@ -2,17 +2,387 @@
 import React from "react";
 import Web3 from "web3";
 import "../app/globals.css";
-import {Swap, getSwapsForAccount} from "../../client/src/contracts/SwapSubgraph"
+import { Swap, getSwapsForAccount } from "../../client/src/contracts/SwapSubgraph"
 import "dotenv/config";
 import { Web3ModalButton } from "../components/Web3ModalButton.tsx";
 import { useState, useEffect } from 'react';
 import { connect } from './metamask.ts';
+import FormModal from '../components/FormModal';
+
 
 import axios from 'axios';
 import { Card, Table, Text, Row, Button } from "@nextui-org/react";
 import styled from 'styled-components';
 import { GiLightningHelix } from "react-icons/gi";
 import { IoMdCog } from 'react-icons/io';
+
+// import erc20ABI from '../../../contracts/zap.abi';
+// const { erc20ABI } = require('../../../contracts/zap.abi');
+const erc20ABI = [
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "Approval",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "value",
+                "type": "uint256"
+            }
+        ],
+        "name": "Transfer",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "spender",
+                "type": "address"
+            }
+        ],
+        "name": "allowance",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "approve",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "receiver",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "burnToken",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [
+            {
+                "internalType": "uint8",
+                "name": "",
+                "type": "uint8"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "subtractedValue",
+                "type": "uint256"
+            }
+        ],
+        "name": "decreaseAllowance",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "addedValue",
+                "type": "uint256"
+            }
+        ],
+        "name": "increaseAllowance",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "receiver",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "issueToken",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "name",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalSupply",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "transfer",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "transferFrom",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
 
 const IndexPage = styled.div`
     table{
@@ -74,13 +444,16 @@ const CardLine = styled.div`
     margin-bottom: 30px;
 `
 
+const web3 = new Web3('https://rpc-mumbai.maticvigil.com/')
+const contractAddress = '0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7';
 const POLYGON_MUMBAI_URL = "https://mumbai.polygonscan.com/tx/"
+
 export default function Home() {
-    const [web3, setWeb3] = useState<Web3>(new Web3('https://api-testnet.polygonscan.com/'));
-    const [account, setAccount] = useState<string>("0x3a22c8bc68e98b0faf40f349dd2b2890fae01484");
-    const [balances, setBalances] = useState<{ [account: string]: string }>({});
+    const [account, setAccount] = useState<string>("");
+    const [balances, setBalances] = useState<string>("");
     const [txs, setTxs] = useState<Swap[]>([]);
-    // const { active, error, activate } = useWeb3React<Web3Provider>();
+
+    const [configs, setConfigs] = useState<{}>({});
 
     const API_ENDPOINT = 'https://api.polygonscan.com/api';
 
@@ -109,117 +482,123 @@ export default function Home() {
             throw error;
         }
     }
-    useEffect(() => {
-        getSwapsForAccount(account).then((swaps) => {
-            setTxs(swaps)
-        })
-        getBalanceAPI(account)
 
-        // Fetch the list of accounts and set them in state
-        // web3.eth.getAccounts().then(setAccounts);
+    async function getConfigs(): Promise<any> {
+        try {
+            const response = await axios.get("http://localhost:8082/config");
+
+            console.log(response.data.result);
+
+            setConfigs(response.data.result)
+            return response.data;
+        } catch (error: any) {
+            console.error(`Error fetching configs ${error.message}`);
+            throw error;
+        }
+    }
+
+    useEffect(() => {
+        if (account != "") {
+            getSwapsForAccount(account).then((swaps) => {
+                setTxs(swaps)
+            })
+        }
     }, []);
 
-    // useEffect(() => {
-    //     if (web3 && accounts.length > 0) {
-    //         // Create a dictionary of account balances and set it in state
-    //         const balances = {} as { [account: string]: string };
-    //         accounts.forEach(account => {
-    //             web3.eth.getBalance(account).then(balance => {
-
-    //                 const balanceMatic = web3.utils.fromWei(balance, 'ether');
-    //                 balances[account] = balanceMatic;
-    //                 setBalances(balances);
-    //             });
-    //         });
-    //     }
-    // }, [web3, accounts]);
-
-    // Example function to get the balance of a Polygon Mumbai testnet address
     async function getBalance(address: string): Promise<string> {
-        const balanceWei = await web3.eth.getBalance(address);
-        const balanceMatic = web3.utils.fromWei(balanceWei, 'ether');
-        return balanceMatic;
-    }
-    // async loadWeb3() {
-    //   if (window.ethereum) {
-    //     window.web3 = new Web3(window.ethereum);
-    //     await window.ethereum.request({
-    //       method: "eth_requestAccounts",
-    //     });
-    //   } else if (window.web3) {
-    //     window.web3 = new Web3(window.web3.currentProvider);
-    //   } else {
-    //     window.alert(
-    //       "Non-Ethereum browser detected. You should consider trying MetaMask!"
-    //     );
-    //   }
-    // }
 
-    const [walletAddress, setWalletAddress] = useState("");
+        const contract = new web3.eth.Contract(erc20ABI, contractAddress);
+        const balanceWei = await contract.methods.balanceOf(address).call();
+        // const balanceWei = await web3.eth.getBalance(address);
+
+        return web3.utils.fromWei(balanceWei, 'ether');;
+    }
 
     useEffect(() => {
         getCurrentWalletConnected();
         addWalletListener();
-      }, [walletAddress]);
-    
-      const connectWallet = async () => {
+        getConfigs();
+    }, [account]);
+
+    const connectWallet = async () => {
         if (typeof window != "undefined" && typeof window.ethereum != "undefined") {
-          try {
-            /* MetaMask is installed */
-            const accounts = await window.ethereum.request({
-              method: "eth_requestAccounts",
-            });
-            setWalletAddress(accounts[0]);
-            console.log(accounts[0]);
-          } catch (err ) {
-            console.error(err.message);
-          }
-        } else {
-          /* MetaMask is not installed */
-          console.log("Please install MetaMask");
-        }
-      };
-    
-      const getCurrentWalletConnected = async () => {
-        if (typeof window != "undefined" && typeof window.ethereum != "undefined") {
-          try {
-            const accounts = await window.ethereum.request({
-              method: "eth_accounts",
-            });
-            if (accounts.length > 0) {
-              setWalletAddress(accounts[0]);
-              console.log(accounts[0]);
-            } else {
-              console.log("Connect to MetaMask using the Connect button");
+            try {
+                /* MetaMask is installed */
+                const accounts = await window.ethereum.request({
+                    method: "eth_requestAccounts",
+                });
+                updateAccount(accounts[0]);
+            } catch (err) {
+                console.error(err.message);
             }
-          } catch (err) {
-            console.error(err.message);
-          }
         } else {
-          /* MetaMask is not installed */
-          console.log("Please install MetaMask");
+            /* MetaMask is not installed */
+            console.log("Please install MetaMask");
         }
+    };
+
+    const getCurrentWalletConnected = async () => {
+        if (typeof window != "undefined" && typeof window.ethereum != "undefined") {
+            try {
+                const accounts = await window.ethereum.request({
+                    method: "eth_accounts",
+                });
+                if (accounts.length > 0) {
+                    updateAccount(accounts[0])
+                } else {
+                    console.log("Connect to MetaMask using the Connect button");
+                }
+            } catch (err) {
+                console.error(err.message);
+            }
+        } else {
+            /* MetaMask is not installed */
+            console.log("Please install MetaMask");
+        }
+    };
+
+    function updateAccount(account: string) {
+        setAccount(account);
+        console.log(account);
+
+        // getBalanceAPI(account)
+        getBalance(account).then(setBalances)
+    }
+    const addWalletListener = async () => {
+        if (typeof window != "undefined" && typeof window.ethereum != "undefined") {
+            window.ethereum.on("accountsChanged", (accounts: any[]) => {
+                updateAccount(accounts[0])
+            });
+        } else {
+            /* MetaMask is not installed */
+            setAccount("");
+            setBalances("")
+            console.log("Please install MetaMask");
+        }
+    };
+
+    function openModal() {
+
+    }
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
       };
     
-      const addWalletListener = async () => {
-        if (typeof window != "undefined" && typeof window.ethereum != "undefined") {
-          window.ethereum.on("accountsChanged", (accounts) => {
-            setWalletAddress(accounts[0]);
-            console.log(accounts[0]);
-          });
-        } else {
-          /* MetaMask is not installed */
-          setWalletAddress("");
-          console.log("Please install MetaMask");
-        }
+      const handleCloseModal = () => {
+        setIsModalOpen(false);
       };
 
     return (
         <IndexPage>
             {
-                walletAddress != '' ?
-             (<div> <TitleLeftPane><Title><GiLightningHelix size={48} color="yellow" />Zap Token </Title></TitleLeftPane>
-             <TitleRightPane><IoMdCog size={48} color="yellow" /> Settings</TitleRightPane>
+                account != '' ?
+                    (<div> <TitleLeftPane><Title><GiLightningHelix size={48} color="yellow" />Zap Token </Title></TitleLeftPane>
+                        <TitleRightPane onPress={openModal}><IoMdCog size={48} color="yellow" /> Settings
+                        <Button onPress={handleOpenModal}>Open Modal</Button>
+    {isModalOpen && <FormModal />}
+                        </TitleRightPane>
                         <CardLine>
                             <Card>
                                 <Card.Header>
@@ -228,7 +607,7 @@ export default function Home() {
                                 <Card.Divider />
                                 <Card.Body css={{ py: "$10" }}>
                                     <Text b>
-                                        {balances.toString()} MATIC
+                                        {balances.toString()} ZAP
                                     </Text>
                                 </Card.Body>
                             </Card>
@@ -239,7 +618,7 @@ export default function Home() {
                                 <Card.Divider />
                                 <Card.Body css={{ py: "$10" }}>
                                     <Text b>
-                                        {balances.toString()} Watt/hour
+                                        {configs} Watt/hour
                                     </Text>
                                 </Card.Body>
                             </Card>
@@ -250,11 +629,12 @@ export default function Home() {
                                 <Card.Divider />
                                 <Card.Body css={{ py: "$10" }}>
                                     <Text b>
-                                        {balances.toString()} Watt/hour
+                                        {configs} Watt/hour
                                     </Text>
                                 </Card.Body>
                             </Card>
                         </CardLine>
+                        {/* { txs ? (txs > 0 ? */}
                         <Table striped>
                             <Table.Header>
                                 <Table.Column>From</Table.Column>
@@ -281,11 +661,11 @@ export default function Home() {
                     </div>
                     ) :
                     (<Button className="metamaskButton" onPress={connectWallet} css={{
-                            position: "fixed",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",                      
-                      }}>
+                        position: "fixed",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                    }}>
                         Connect to Metamask
                     </Button>)
             }
