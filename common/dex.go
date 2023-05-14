@@ -16,7 +16,23 @@ import (
 )
 
 func BuyZap(client *ethclient.Client, wallet *helper.Wallet, amount *big.Int) {
-	pool, err := helper.ConstructV3Pool(client, MaticToken, ZapToken, uint64(constants.FeeLowest))
+	swapZapMatic(client, wallet, MaticToken, amount)
+}
+
+func SellZap(client *ethclient.Client, wallet *helper.Wallet, amount *big.Int) {
+	swapZapMatic(client, wallet, ZapToken, amount)
+}
+
+func swapZapMatic(client *ethclient.Client, wallet *helper.Wallet, token *coreEntities.Token, amount *big.Int) {
+	fromToken := token
+	var toToken *coreEntities.Token
+	if token == MaticToken {
+		toToken = ZapToken
+	} else {
+		toToken = MaticToken
+	}
+
+	pool, err := helper.ConstructV3Pool(client, fromToken, toToken, uint64(constants.FeeLowest))
 	if err != nil {
 		log.Fatal("Error detecting pool: ", err)
 	}
@@ -40,12 +56,12 @@ func BuyZap(client *ethclient.Client, wallet *helper.Wallet, amount *big.Int) {
 
 	// single trade input
 	// single-hop exact input
-	r, err := entities.NewRoute([]*entities.Pool{pool}, MaticToken, ZapToken)
+	r, err := entities.NewRoute([]*entities.Pool{pool}, fromToken, toToken)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	trade, err := entities.FromRoute(r, coreEntities.FromRawAmount(MaticToken, amount), coreEntities.ExactInput)
+	trade, err := entities.FromRoute(r, coreEntities.FromRawAmount(fromToken, amount), coreEntities.ExactInput)
 	if err != nil {
 		log.Fatal(err)
 	}
