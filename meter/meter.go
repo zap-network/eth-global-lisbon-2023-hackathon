@@ -28,6 +28,9 @@ type config struct {
 	IntervalToCheck     int `yaml:"timeToCheck"`
 }
 
+var ZapToken = common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
+var account = common.HexToAddress("0xB8eD17D5a8954c6ef683721E72752e4aAB9E92D8")
+
 func main() {
 
 	err := initConfig()
@@ -38,7 +41,7 @@ func main() {
 	fmt.Printf("%+v", ConfigGlobal)
 
 	go startEcho()
-	account := common.HexToAddress("0x18e2CeE48035F4558Eb75a629C37d713EFC005c2")
+
 	readContract(account)
 	//recordProduction(account)
 	//recordConsumption(account)
@@ -105,10 +108,10 @@ func calculateBalance() {
 
 		if consumptionPeriod >= 0 {
 			fmt.Printf("\nNet positive %+v\n", consumptionPeriod)
-			recordProduction(common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7"))
+			recordProduction(account)
 		} else {
 			fmt.Printf("\nNet negative %+v\n", consumptionPeriod)
-			recordConsumption(common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7"))
+			recordConsumption(account)
 		}
 	}
 }
@@ -120,8 +123,7 @@ func readContract(account common.Address) {
 		panic(err)
 	}
 
-	address := common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
-	instance, err := NewZap(address, client)
+	instance, err := NewZap(ZapToken, client)
 	if err != nil {
 		panic(err)
 	}
@@ -162,8 +164,7 @@ func recordProduction(account common.Address) {
 	auth.GasLimit = uint64(300000) // in units
 	auth.GasPrice = gasPrice
 
-	address := common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
-	instance, err := NewZap(address, client)
+	instance, err := NewZap(ZapToken, client)
 	if err != nil {
 		panic(err)
 	}
@@ -173,7 +174,7 @@ func recordProduction(account common.Address) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("tx sent: %s", tx.Hash().Hex())
+	fmt.Printf("tx sent: %s\n", tx.Hash().Hex())
 }
 
 func recordConsumption(account common.Address) {
@@ -204,8 +205,7 @@ func recordConsumption(account common.Address) {
 	auth.GasLimit = uint64(300000) // in units
 	auth.GasPrice = gasPrice
 
-	address := common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
-	instance, err := NewZap(address, client)
+	instance, err := NewZap(ZapToken, client)
 	if err != nil {
 		panic(err)
 	}
