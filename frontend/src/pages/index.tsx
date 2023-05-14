@@ -499,9 +499,12 @@ export default function Home() {
 
     useEffect(() => {
         if (account != "") {
-            getSwapsForAccount(account).then((swaps) => {
-                setTxs(swaps)
-            })
+            const intervalId = setInterval(() => {
+                getSwapsForAccount(account).then((swaps) => {
+                    setTxs(swaps)
+                })
+                getBalanceAPI(account)
+            }, 1000);
         }
     }, []);
 
@@ -637,9 +640,9 @@ export default function Home() {
                         {/* { txs ? (txs > 0 ? */}
                         <Table striped>
                             <Table.Header>
-                                <Table.Column>From</Table.Column>
-                                <Table.Column>To</Table.Column>
-                                <Table.Column>Value</Table.Column>
+                                <Table.Column>Swapped from</Table.Column>
+                                <Table.Column>Swapped To</Table.Column>
+                                <Table.Column>Price</Table.Column>
                                 <Table.Column>Gas</Table.Column>
                                 <Table.Column>Value USD</Table.Column>
                             </Table.Header>
@@ -648,9 +651,9 @@ export default function Home() {
                                     <Table.Row key={index} >
                                         <Table.Cell>
                                             <a href={`${POLYGON_MUMBAI_URL}${item.transaction.id}`}>
-                                                {item.origin}</a>
+                                                {!item.amount0.startsWith('-') ? item.amount0 + ' ' + item.pool.token0.symbol : item.amount1 + ' ' + item.pool.token1.symbol}</a>
                                         </Table.Cell>
-                                        <Table.Cell>{item.recipient}</Table.Cell>
+                                        <Table.Cell>{item.amount0.startsWith('-') ? (item.amount0 + ' ' + item.pool.token0.symbol).substring(1) : (item.amount1 + ' ' + item.pool.token1.symbol).substring(1)}</Table.Cell>
                                         <Table.Cell>{item.amount0}</Table.Cell>
                                         <Table.Cell>{item.transaction.gasUsed}</Table.Cell>
                                         <Table.Cell>{item.amountUSD}</Table.Cell>
