@@ -4,23 +4,16 @@ import Web3 from "web3";
 import "../app/globals.css";
 import { Swap, getSwapsForAccount } from "../../client/src/contracts/SwapSubgraph"
 import "dotenv/config";
-import { Web3ModalButton } from "../components/Web3ModalButton.tsx";
 import { useState, useEffect } from 'react';
-import { connect } from './metamask.ts';
-import FormModal from '../components/FormModal';
 import { Modal, Input } from "@nextui-org/react";
 import { useForm } from "react-hook-form";
-
-
 import axios from 'axios';
-import { Card, Table, Text, Row, Button } from "@nextui-org/react";
+import { Button, Text, Card, Table } from "@nextui-org/react";
 import styled from 'styled-components';
 import { GiLightningHelix } from "react-icons/gi";
 import { IoMdCog } from 'react-icons/io';
 import Link from "next/link";
 
-// import erc20ABI from '../../../contracts/zap.abi';
-// const { erc20ABI } = require('../../../contracts/zap.abi');
 const erc20ABI = [
     {
         "inputs": [],
@@ -437,10 +430,6 @@ const TitleRightPane = styled.div`
     float: right;
 `
 
-
-const Form = styled.form`
-`
-
 const Title = styled.h1`
     font-weight: 1000;
     font-style: oblique;
@@ -471,13 +460,20 @@ export default function Home() {
     const [configs, setConfigs] = useState<{}>({});
 
     const {
-        register,
-        handleSubmit,
         formState: { errors },
     } = useForm<FormData>();
 
     const onSubmit = (data: FormData) => {
         console.log(data);
+
+        let productionRateHourInput = document.getElementById('productionRateHourInput')?.value
+        let consumptionRateHourInput = document.getElementById('consumptionRateHourInput')?.value
+        
+        let request = {
+         "currentProductionRateHour": productionRateHourInput,
+         "currentConsumptionRateHour": consumptionRateHourInput,
+        }
+        saveConfigs(request)
         handleCloseModal();
     };
 
@@ -521,15 +517,31 @@ export default function Home() {
         }
     }
 
+    async function saveConfigs(data: any): Promise<any> {
+        axios.post('http://localhost:8082/config', data, {
+            headers: {
+              'Content-Type': 'application/json'
+            }})
+            .then((response: { data: any; }) => {
+                console.log(response.data);
+                return response.data;
+
+            })
+            .catch((error: { message: any; }) => {
+                console.error(`Error fetching configs ${error.message}`);
+
+            });
+    }
+
     useEffect(() => {
-            const intervalId = setInterval(() => {
-                if (account != "") {
+        const intervalId = setInterval(() => {
+            if (account != "") {
                 getSwapsForAccount(account).then((swaps) => {
                     setTxs(swaps)
                 })
                 getBalance(account)
             }
-            }, 3000);
+        }, 3000);
     }, [account]);
 
     async function getBalance(address: string): Promise<string> {
@@ -547,9 +559,8 @@ export default function Home() {
         if (configs && configs["IntervalToCheck"]) {
             const interval = setInterval(() => {
                 getConfigs();
-    
-              }, configs["IntervalToCheck"]*1000)
-              return () => clearInterval(interval)
+
+            }, configs["IntervalToCheck"] * 1000)
         }
     }, [account]);
 
@@ -585,18 +596,15 @@ export default function Home() {
                 console.error(err.message);
             }
         } else {
-            /* MetaMask is not installed */
             console.log("Please install MetaMask");
         }
     };
 
     function updateAccount(account: string) {
         setAccount(account);
-        console.log(account);
-
-        // getBalanceAPI(account)
         getBalance(account).then(setBalances)
     }
+
     const addWalletListener = async () => {
         if (typeof window != "undefined" && typeof window.ethereum != "undefined") {
             window.ethereum.on("accountsChanged", (accounts: any[]) => {
@@ -625,32 +633,58 @@ export default function Home() {
                 account != '' ?
                     (<Container>
                         <TitleContainer><TitleLeftPane><Title><GiLightningHelix size={48} color="yellow" />Zap Token</Title></TitleLeftPane>
-                            <TitleRightPane onClick={handleOpenModal}><IoMdCog size={48} color="yellow" /> Settings
-                                {/* <Button onPress={handleOpenModal}>Open Modal</Button> */}
-                                {isModalOpen && (<Modal visible={isModalOpen} onClose={handleCloseModal}>
-                                    {/* <Modal.Title>Change settings</Modal.Title> */}
-                                    <Modal.Content>
-                                        {/* <Form onSubmit={handleSubmit(onSubmit)}> */}
-                                            {/* <Text block>Production Rate Hour</Text>
+                            <TitleRightPane onClick={handleOpenModal}><IoMdCog size={48} color="yellow" />
+                                {isModalOpen && (<div>
+                                    <Modal
+                                        closeButton
+                                        preventClose
+                                        aria-labelledby="modal-title"
+                                        open={isModalOpen}
+                                        onClose={handleCloseModal}
+                                    >
+                                        <Modal.Header>
+                                            <Text id="modal-title" size={18}>
+                                                <Text b size={18}>
+                                                Configuration Settings
+                                                </Text>
+                                            </Text>
+                                        </Modal.Header>
+                                        <Modal.Body>
                                             <Input
-                                                type="text"
-                                                placeholder="Enter the desired production rate hour"
-                                                {...register("name", { required: true })}
+                                                clearable
+                                                bordered
+                                                fullWidth
+                                                color="primary"
+                                                size="lg"
+                                                labelPlaceholder="Production Rate Hour"
+                                                initialValue={configs["ProductionRateHour"]}
+                                                id="productionRateHourInput"
+                                                css={{
+                                                    marginTop: "30px !important",
+                                                    marginBottom: "50px"
+                                                }}
                                             />
-                                            {errors.name && <Text block color="red">Name is required</Text>}
-                                            <Text block>Email</Text>
                                             <Input
-                                                type="email"
-                                                placeholder="Enter the desired consupmtion rate hour"
-                                                {...register("email", { required: true })}
+                                                clearable
+                                                bordered
+                                                fullWidth
+                                                color="primary"
+                                                size="lg"
+                                                labelPlaceholder="Consumption Rate Hour"
+                                                initialValue={configs["ConsumptionRateHour"]}
+                                                id="consumptionRateHourInput"
                                             />
-                                            {errors.email && (
-                                                <Text block color="red">Email is required</Text>
-                                            )}
-                                            <Button type="submit">Submit</Button> */}
-                                        {/* </Form> */}
-                                    </Modal.Content>
-                                </Modal>)
+                                        </Modal.Body>
+                                        <Modal.Footer>
+                                            <Button auto flat color="error" onPress={handleCloseModal} css={{backgroundColor: "unset !important"}}>
+                                                Close
+                                            </Button>
+                                            <Button auto onPress={onSubmit}  css={{backgroundColor: "#0072F5 !important"}}>
+                                                Submit
+                                            </Button>
+                                        </Modal.Footer>
+                                    </Modal>
+                                </div>)
                                 }
                             </TitleRightPane>
                         </TitleContainer>
@@ -673,7 +707,7 @@ export default function Home() {
                                 <Card.Divider />
                                 <Card.Body css={{ py: "$10" }}>
                                     <Text b>
-                                        {configs ? configs["ProdutionRateHour"] : ""} Watt/hour
+                                        {configs ? configs["ProductionRateHour"] : ""} Watt/hour
                                     </Text>
                                 </Card.Body>
                             </Card>
