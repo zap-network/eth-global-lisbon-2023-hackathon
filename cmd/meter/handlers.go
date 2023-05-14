@@ -51,7 +51,7 @@ func EditConfig(c echo.Context) error {
 		if err != nil {
 			return c.String(http.StatusOK, fmt.Sprintf("%+v", json))
 		}
-		common.ConfigGlobal.ConsumptionRateHour = newCurrentProductionRateHour
+		common.ConfigGlobal.ProductionRateHour = newCurrentProductionRateHour
 	}
 
 	return c.String(http.StatusOK, fmt.Sprintf("%v", json))
