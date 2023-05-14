@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"math/big"
 	"os"
 	"time"
@@ -21,15 +22,16 @@ var CurrentConsumption = 0
 var CurrentProduction = 0
 
 var ConfigGlobal = config{}
+var ZapToken = common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
+var Account = common.HexToAddress("0xB8eD17D5a8954c6ef683721E72752e4aAB9E92D8")
+var MumbaiChainID = int64(80001)
+var PolygonTestnetURL = "https://polygon-testnet-rpc.allthatnode.com:8545"
 
 type config struct {
 	ProductionRateHour  int `yaml:"currentProductionRateHour"`
 	ConsumptionRateHour int `yaml:"currentConsumptionRateHour"`
 	IntervalToCheck     int `yaml:"timeToCheck"`
 }
-
-var ZapToken = common.HexToAddress("0x3092ef862A180D0f44C5E537EfE05Cd7DCbB28A7")
-var account = common.HexToAddress("0xB8eD17D5a8954c6ef683721E72752e4aAB9E92D8")
 
 func main() {
 
@@ -42,13 +44,8 @@ func main() {
 
 	go startEcho()
 
-	readContract(account)
-	//recordProduction(account)
-	//recordConsumption(account)
-	//readContract(account)
+	readContract(Account)
 	go calculateBalance()
-	//go produceCounter()
-	//go consumptionCounter()
 	select {}
 }
 
@@ -79,46 +76,27 @@ func startEcho() {
 
 }
 
-func produceCounter() {
-	for {
-		fmt.Printf("\n Consuming \n")
-		time.Sleep(10 * time.Second)
-		CurrentConsumption += 1
-		fmt.Printf("\n CurrentConsumption %+v \n", CurrentConsumption)
-	}
-}
-
-func consumptionCounter() {
-
-	for {
-		fmt.Printf("\n Producing \n")
-		time.Sleep(10 * time.Second)
-		CurrentProduction += 1
-		fmt.Printf("\n CurrentProduction %+v \n", CurrentProduction)
-	}
-}
-
 func calculateBalance() {
 	for {
 		time.Sleep(time.Duration(ConfigGlobal.IntervalToCheck) * time.Second)
 		consumption := ConfigGlobal.ProductionRateHour - ConfigGlobal.ConsumptionRateHour
 
-		consumptionPeriod := (float32(ConfigGlobal.IntervalToCheck) / 60) * float32(consumption)
+		consumptionPeriod := (float64(ConfigGlobal.IntervalToCheck) / 60) * float64(consumption)
 		fmt.Printf("%+v", consumptionPeriod)
 
-		if consumptionPeriod >= 0 {
+		if consumptionPeriod > 0 {
 			fmt.Printf("\nNet positive %+v\n", consumptionPeriod)
-			recordProduction(account)
-		} else {
+			recordProduction(Account, consumptionPeriod)
+		} else if consumption < 0 {
 			fmt.Printf("\nNet negative %+v\n", consumptionPeriod)
-			recordConsumption(account)
+			recordConsumption(Account, consumptionPeriod)
 		}
 	}
 }
 
 func readContract(account common.Address) {
 
-	client, err := ethclient.Dial("https://polygon-testnet-rpc.allthatnode.com:8545")
+	client, err := ethclient.Dial(PolygonTestnetURL)
 	if err != nil {
 		panic(err)
 	}
@@ -137,12 +115,13 @@ func readContract(account common.Address) {
 
 }
 
-func recordProduction(account common.Address) {
+func recordProduction(account common.Address, amount float64) {
 	wallet := LoadWallet()
 
-	client, err := ethclient.Dial("https://polygon-testnet-rpc.allthatnode.com:8545")
+	client, err := ethclient.Dial(PolygonTestnetURL)
 	if err != nil {
 		// handle error
+		panic(err)
 	}
 
 	nonce, err := client.PendingNonceAt(context.Background(), wallet.address)
@@ -155,7 +134,7 @@ func recordProduction(account common.Address) {
 		log.Fatal(err)
 	}
 
-	auth, err := bind.NewKeyedTransactorWithChainID(wallet.privateKey, big.NewInt(80001))
+	auth, err := bind.NewKeyedTransactorWithChainID(wallet.privateKey, big.NewInt(MumbaiChainID))
 	if err != nil {
 		panic(err)
 	}
@@ -169,7 +148,9 @@ func recordProduction(account common.Address) {
 		panic(err)
 	}
 
-	tx, err := instance.IssueToken(auth, account, big.NewInt(1))
+	floorAmount := int64(math.Floor(amount))
+
+	tx, err := instance.IssueToken(auth, account, big.NewInt(floorAmount))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -177,10 +158,10 @@ func recordProduction(account common.Address) {
 	fmt.Printf("tx sent: %s\n", tx.Hash().Hex())
 }
 
-func recordConsumption(account common.Address) {
+func recordConsumption(account common.Address, amount float64) {
 	wallet := LoadWallet()
 
-	client, err := ethclient.Dial("https://polygon-testnet-rpc.allthatnode.com:8545")
+	client, err := ethclient.Dial(PolygonTestnetURL)
 	if err != nil {
 		// handle error
 		panic(err)
@@ -196,7 +177,7 @@ func recordConsumption(account common.Address) {
 		log.Fatal(err)
 	}
 
-	auth, err := bind.NewKeyedTransactorWithChainID(wallet.privateKey, big.NewInt(80001))
+	auth, err := bind.NewKeyedTransactorWithChainID(wallet.privateKey, big.NewInt(MumbaiChainID))
 	if err != nil {
 		panic(err)
 	}
@@ -210,7 +191,9 @@ func recordConsumption(account common.Address) {
 		panic(err)
 	}
 
-	tx, err := instance.BurnToken(auth, account, big.NewInt(1))
+	floorAmount := int64(math.Floor(amount))
+
+	tx, err := instance.BurnToken(auth, account, big.NewInt(floorAmount))
 	if err != nil {
 		log.Fatal(err)
 	}
